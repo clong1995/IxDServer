@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单</title>
+    <link href="../resource/style/public.css" rel="stylesheet">
+    <script src="../resource/lib/cooperation/Base.class.js"></script>
+    <script src="../resource/script/config.js"></script>
+    <script src="../resource/script/public.js"></script>
+</head>
+<body>
+<h1>-- 菜单 --</h1>
+<p>本页接口用于菜单相关的操作</p>
+
+<br>
+<fieldset>
+    <legend>获取当前用户的菜单列表</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] no
+[POST] :10104/menu/getList
+[RES]{
+        "code":0
+        "msg":"",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":10104/menu/getList"><br>
+        <button class="submit">提交</button>
+        <br>
+        result:<br>
+        <textarea class="response"></textarea>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>根据用户id获取菜单列表</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] no
+[POST] :10104/menu/getListByUser
+[REQ] {
+        "user":""   //string，用户，必填
+    }
+[RES]{
+        "code":0
+        "msg":"",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":10104/menu/getListByUser"><br>
+        <button class="submit">提交</button>
+        <br>
+        <textarea class="request">
+{
+    "user":"2e700ed6-971d-4c56-89ac-e7615f67570a"
+}
+        </textarea><br>
+        result:<br>
+        <textarea class="response"></textarea>
+    </div>
+</fieldset>
+<br>
+<fieldset>
+    <legend>根据用户id获取状态和菜单列表</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] no
+[POST] :10104/menu/getListByUserStatus
+[REQ] {
+        "user":""   //string，用户，必填
+    }
+[RES]{
+        "code":0
+        "msg":"",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":10104/menu/getListByUserStatus"><br>
+        <button class="submit">提交</button>
+        <br>
+        <textarea class="request">
+{
+    "user":"2e700ed6-971d-4c56-89ac-e7615f67570a"
+}
+        </textarea><br>
+        result:<br>
+        <textarea class="response"></textarea>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>添加菜单</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] yes
+[POST] :10104/menu/add
+[REQ] {
+        "user":""   //string，用户，必填
+        "menu":""   //string，菜单，必填
+        "sort":0    //int，用户，必填
+    }
+[RES]{
+        "code":0
+        "msg":"请求成功",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":10104/menu/add"><br>
+        request:<br>
+        <textarea class="request">
+{
+    "user":"88eebcd7-6738-4598-b3f4-9cee48b405ec",
+    "menu":"32db7bff-4b2e-4a46-aa05-d402a8950d14",
+    "sort":0
+}
+        </textarea><br>
+        <button class="submit">提交</button>
+        <br>
+        result:<br>
+        <textarea class="response"></textarea>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>批量给用户添加菜单</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] yes
+[POST] :10104/menu/addMulti
+[REQ] {
+        "user":["8f3f2052-aa2c-45db-9067-14bc79021017","cf3abf6a-1ad5-4131-af44-c1611fff659f"]   //[]string，用户，必填
+        "menu":[{menu:"15cb24e0-6507-4114-9246-f547fe750c52",sort:1},{menu:"32db7bff-4b2e-4a46-aa05-d402a8950d14",sort:2},menu:"a4adb493-a4d0-43aa-876b-f27721be20ec",sort:3]   //[]obj{menu,sort}，菜单，必填
+    }
+[RES]{
+        "code":0
+        "msg":"请求成功",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":10104/menu/addMulti"><br>
+        request:<br>
+        <textarea class="request">
+{
+        "users": [
+            "8f3f2052-aa2c-45db-9067-14bc79021017",
+            "cf3abf6a-1ad5-4131-af44-c1611fff659f"
+        ],
+        "menus": [
+            {
+                "menu": "15cb24e0-6507-4114-9246-f547fe750c52",
+                "sort": 1
+            },
+            {
+                "menu": "32db7bff-4b2e-4a46-aa05-d402a8950d14",
+                "sort": 2
+            },
+            {
+                "menu": "a4adb493-a4d0-43aa-876b-f27721be20ec",
+                "sort": 3
+            }
+        ]
+    }
+        </textarea><br>
+        <button class="submit">提交</button>
+        <br>
+        result:<br>
+        <textarea class="response"></textarea>
+    </div>
+</fieldset>
+
+</body>
+</html>

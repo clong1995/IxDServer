@@ -1,0 +1,73 @@
+body {
+    overflow: auto;
+    padding: 10px 20px;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+fieldset {
+    padding: 10px;
+    border: 1px solid #000;
+    margin-bottom: 10px;
+}
+
+fieldset > legend {
+    color: coral;
+    border: 1px solid #000;
+    font-weight: bolder;
+    padding: 0 10px;
+    font-size: 18px;
+}
+
+.red {
+    color: red;
+    padding: 0 10px;
+}
+
+.discard {
+    filter: grayscale(100%);
+    opacity: .5;
+    pointer-events: none;
+}
+
+
+fieldset > .show {
+    color: blue;
+    cursor: pointer;
+}
+
+fieldset > pre {
+    font-size: 12px;
+    background: #fafafa;
+    border: 1px solid #ececec;
+    padding: 10px;
+}
+
+fieldset > .test {
+    background: #fafafa;
+    border: 1px solid #c0c0c0;
+    padding: 10px;
+}
+
+fieldset > .test > .api,
+fieldset > .test > .request {
+    width: 100%;
+}
+
+fieldset > .test > .request {
+    height: 70px;
+}
+
+fieldset > .test > .response {
+    margin-top: 10px;
+}
+
+fieldset > .test > .submit {
+    color: blue;
+    font-weight: bolder;
+    border: 2px solid blue;
+    padding: 0 10px;
+    cursor: pointer;
+}

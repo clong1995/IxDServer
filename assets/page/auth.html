@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>权限</title>
+    <link href="../resource/style/public.css" rel="stylesheet">
+    <link rel="stylesheet" href="../resource/lib/jquery/jsonview/jsonview.css">
+    <script src="../resource/lib/cooperation/Base.class.js"></script>
+    <script src="../resource/script/config.js"></script>
+    <script src="../resource/lib/jquery/jquery.js"></script>
+    <script src="../resource/lib/jquery/jsonview/jsonview.js"></script>
+    <script src="../resource/script/public.js"></script>
+</head>
+<body>
+<h1>-- 权限相关 --</h1>
+<p>本页接口用于认证相关</p>
+<br>
+<fieldset>
+    <legend>注册接口</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[POST] :19959/auth/signup
+[REQ] {
+        "name":"成龙哥哥",//字符串，必填
+        "email":"123@qq.com",//邮箱，字符串，必填。用于登录
+        "password":"123456"//字符串，必填
+    }
+[RES]{
+        "code":0,
+        "msg":"请求成功",
+        "data":""//直接返回token，这样就不用再次登录了
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":19959/auth/signup"><br>
+        request:<br>
+        <textarea class="request">
+{
+    "name":"成龙哥哥",
+    "email":"123@qq.com",
+    "password":"123456"
+}
+        </textarea><br>
+        <button class="submit">提交</button>
+        <br>
+        <div class="response"></div>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>登录接口</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[POST] :19959/auth/signin
+[REQ] {
+        "email":"123@qq.com",//邮箱，字符串，必填
+        "password":"123456"//密码，字符串，必填
+    }
+[RES]{
+        "code":0,
+        "msg":"请求成功",
+        "data":"xxx"//直接返回token，这样就不用再次登录了
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":19959/auth/signin"><br>
+        request:<br>
+        <textarea class="request">
+{
+    "email":"123@qq.com",
+    "password":"123456"
+}
+        </textarea><br>
+        <button class="submit">提交</button>
+        <br>
+        <div class="response"></div>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>根据token获取id</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] true
+[POST] :19959/auth/unToken
+[REQ]
+[RES]{
+        "code":0,
+        "msg":"请求成功",
+        "data":"xxx"//返回token
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":19959/auth/unToken"><br>
+        <button class="submit">提交</button>
+        <br>
+
+        <div class="response"></div>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>token续期</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[AUTH] true
+[POST] :19959/auth/prolong
+[REQ]
+[RES]{
+        "code":0,
+        "msg":"请求成功",
+        "data":"xxx"//返回token
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        post:<input class="api" type="text" readonly value=":19959/auth/prolong"><br>
+        <button class="submit">提交</button>
+        <br>
+
+        <div class="response"></div>
+    </div>
+</fieldset>
+
+<br>
+<fieldset>
+    <legend>获取七牛的token</legend>
+    <h2 class="show">查看说明</h2>
+    <pre class="info hide">
+[GET] :19959/auth/qiniu
+[RES]{
+        "code":0,
+        "msg":"请求成功",
+        "data":""
+    }
+    </pre>
+    <h2>测试</h2>
+    <div class="test">
+        get:<input class="api" type="text" readonly value=":19959/auth/qiniu"><br>
+        <button class="submit">提交</button>
+        <br>
+
+        <div class="response"></div>
+    </div>
+</fieldset>
+</body>
+</html>

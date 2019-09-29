@@ -6,6 +6,7 @@ import (
 	"IxDServer/param/file"
 	"fmt"
 	"github.com/satori/go.uuid"
+	"log"
 	"path"
 )
 
@@ -27,7 +28,7 @@ func FileAddFolder(p *file.AddFolder, user string) error {
 	return nil
 }
 
-func FileAddFile(p *file.AddFile, user string) error {
+func FileAddFile(p *file.AddFile, user string) (string, error) {
 	//查询文件是否存在
 	//文件类型
 	typee := "file"
@@ -67,9 +68,9 @@ func FileAddFile(p *file.AddFile, user string) error {
 	id := uuid.NewV4().String()
 	err := db.InsertFile(id, p.Etag, p.Name, p.Pid, typee, user, p.MimeType, p.Size, p.State)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return id, nil
 }
 
 func FileDelete(p *file.Delete) error {
@@ -82,6 +83,7 @@ func FileDelete(p *file.Delete) error {
 }
 
 func FileUploadFinish(p *file.UploadFinish) error {
+	log.Println(p)
 	//建立新的文件夹
 	err := db.UpdateFileState(p.Id, 0)
 	if err != nil {

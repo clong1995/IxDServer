@@ -64,13 +64,13 @@ func FileAddFile(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//业务
-		err = service.FileAddFile(p, uid)
+		id, err := service.FileAddFile(p, uid)
 		if err != nil {
 			network.ErrStr(w, err.Error())
 			return
 		}
 
-		network.Succ(w, "")
+		network.Succ(w, id)
 	}
 }
 

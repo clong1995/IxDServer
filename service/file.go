@@ -6,7 +6,6 @@ import (
 	"IxDServer/param/file"
 	"fmt"
 	"github.com/satori/go.uuid"
-	"log"
 	"path"
 )
 
@@ -95,7 +94,6 @@ func FileDelete(p *file.Delete) error {
 }
 
 func FileUploadFinish(p *file.UploadFinish) error {
-	log.Println(p)
 	//建立新的文件夹
 	err := db.UpdateFileFinish(p.Id)
 	if err != nil {

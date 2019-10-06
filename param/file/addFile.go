@@ -14,6 +14,7 @@ type AddFile struct {
 	MimeType string  `json:"mimeType"`
 	Pid      string  `json:"pid" required:"true"`
 	State    int     `json:"state" required:"true"`
+	Local    string  `json:"local"`
 }
 
 func (c *AddFile) Format(w http.ResponseWriter, r *http.Request) error {

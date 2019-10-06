@@ -14,6 +14,7 @@ func init() {
 	http.HandleFunc("/file/listTopFolder", handler.FileListTopFolder)
 	//文件列表
 	http.HandleFunc("/file/list", handler.FileList)
+	//删除的文件列表
 	http.HandleFunc("/file/deleteList", handler.FileDeleteList)
 	//任务列表
 	http.HandleFunc("/file/taskList", handler.FileTaskList)
@@ -21,4 +22,10 @@ func init() {
 	http.HandleFunc("/file/delete", handler.FileDelete)
 	//删除文件
 	http.HandleFunc("/file/uploadFinish", handler.FileUploadFinish)
+	//获取文件信息
+	http.HandleFunc("/file/info", handler.FileInfo)
+	//获取文件信息
+	http.HandleFunc("/file/checkFinish", handler.FileCheckFinish)
+	//获取文件信息
+	http.HandleFunc("/file/uploading", handler.FileUploading)
 }

@@ -40,6 +40,8 @@ func FileAddFile(p *file.AddFile, user string) (string, error) {
 		ext == "mpg", ext == "mpeg", ext == "mpeg1", ext == "mpej2", ext == "mpej3", ext == "mpej4",
 		ext == "vob", ext == "dat", ext == "divx":
 		typee = "video"
+	case ext == ".mp3", ext == ".flac", ext == ".wav", ext == ".apc":
+		typee = "audio"
 	case ext == ".js":
 		typee = "js"
 	case ext == ".css":
@@ -62,11 +64,21 @@ func FileAddFile(p *file.AddFile, user string) (string, error) {
 		typee = "exe"
 	case ext == ".txt":
 		typee = "txt"
+	case ext == ".pdf":
+		typee = "pdf"
+	case ext == ".sql":
+		typee = "database"
+	case ext == ".dmg":
+		typee = "dmg"
+	case ext == ".pkg":
+		typee = "pkg"
+	case ext == ".apk":
+		typee = "apk"
 	default:
 		typee = "file"
 	}
 	id := uuid.NewV4().String()
-	err := db.InsertFile(id, p.Etag, p.Name, p.Pid, typee, user, p.MimeType, p.Size, p.State)
+	err := db.InsertFile(id, p.Etag, p.Name, p.Pid, typee, user, p.MimeType, p.Local, p.Size, p.State)
 	if err != nil {
 		return "", err
 	}
@@ -85,7 +97,7 @@ func FileDelete(p *file.Delete) error {
 func FileUploadFinish(p *file.UploadFinish) error {
 	log.Println(p)
 	//建立新的文件夹
-	err := db.UpdateFileState(p.Id, 0)
+	err := db.UpdateFileFinish(p.Id)
 	if err != nil {
 		return err
 	}
@@ -105,6 +117,13 @@ func FileList(p *file.List, user string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	for _, v := range rows {
+		if v["user"] == user {
+			v["user"] = "own"
+		} else {
+			v["user"] = ""
+		}
+	}
 	return rows, err
 }
 
@@ -122,4 +141,41 @@ func FileTaskList(user string) (interface{}, error) {
 		return nil, err
 	}
 	return rows, err
+}
+
+func FileInfo(p *file.Info) (interface{}, error) {
+	//row, err := db.SelectFileInfo(p.Id)
+	/*if err != nil {
+		return nil, err
+	}*/
+	return nil, nil
+}
+
+func FileCheckFinish(p *file.CheckFinish, user string) (interface{}, error) {
+	if len(p.Ids) > 0 {
+		rows, err := db.SelectFileCheckFinish(p.Ids, user)
+		if err != nil {
+			return nil, err
+		}
+		return rows, nil
+	}
+	return nil, nil
+}
+
+func FileUploading(p *file.Uploading, user string) (interface{}, error) {
+	if len(p.Etags) > 0 {
+		rows, err := db.SelectFileUploading(p.Etags, user)
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range rows {
+			if v["user"] == user {
+				v["user"] = "own"
+			} else {
+				v["user"] = ""
+			}
+		}
+		return rows, nil
+	}
+	return nil, nil
 }

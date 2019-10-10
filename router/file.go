@@ -21,6 +21,8 @@ func init() {
 	//删除文件
 	http.HandleFunc("/file/delete", handler.FileDelete)
 	//删除文件
+	http.HandleFunc("/file/remove", handler.FileRemove)
+	//删除文件
 	http.HandleFunc("/file/uploadFinish", handler.FileUploadFinish)
 	//获取文件信息
 	http.HandleFunc("/file/info", handler.FileInfo)

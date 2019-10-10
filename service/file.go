@@ -93,6 +93,15 @@ func FileDelete(p *file.Delete) error {
 	return nil
 }
 
+func FileRemove(p *file.Remove) error {
+	//建立新的文件夹
+	err := db.DeleteFile(p.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func FileUploadFinish(p *file.UploadFinish) error {
 	//建立新的文件夹
 	err := db.UpdateFileFinish(p.Id)
@@ -142,11 +151,11 @@ func FileTaskList(user string) (interface{}, error) {
 }
 
 func FileInfo(p *file.Info) (interface{}, error) {
-	//row, err := db.SelectFileInfo(p.Id)
-	/*if err != nil {
+	row, err := db.SelectFileById(p.Id)
+	if err != nil {
 		return nil, err
-	}*/
-	return nil, nil
+	}
+	return row, nil
 }
 
 func FileCheckFinish(p *file.CheckFinish, user string) (interface{}, error) {

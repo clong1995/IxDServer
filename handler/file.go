@@ -106,6 +106,38 @@ func FileDelete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func FileRemove(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//认证
+		token := r.Header.Get("Authorization")
+		_, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		p := new(file.Remove)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		err = service.FileRemove(p)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+
+		network.Succ(w, "")
+	}
+}
+
 func FileUploadFinish(w http.ResponseWriter, r *http.Request) {
 	//跨域
 	network.Origin(w)

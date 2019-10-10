@@ -43,6 +43,23 @@ func UpdateFileState(id string, state int) error {
 	return nil
 }
 
+func DeleteFile(id string) error {
+	result, err := Db.Exec("DELETE FROM file WHERE id = ? AND state = 1", id)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	i, err := result.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	if i < 0 {
+		return fmt.Errorf(EMPTY_STR)
+	}
+	return nil
+}
+
 func UpdateFileFinish(id string) error {
 	result, err := Db.Exec("UPDATE file SET state = 0,local = '' WHERE id = ?", id)
 	if err != nil {
@@ -123,8 +140,20 @@ func HasFileFolderName(name, pid, user string) (bool, error) {
 	return false, nil
 }
 
-func FileInfo(id string) (map[string]interface{}, error) {
-	rows, err := Db.Query(`SELECT id,name,type,size,pid,state,user FROM file WHERE id=? LIMIT 1`, id)
+func SelectFileById(id string) (map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT 
+			f.id,f.etag,f.name,f.type,f.size,f.pid,f.state,u.email 
+		FROM 
+			file f 
+		LEFT JOIN 
+			user u 
+		ON 
+			f.user = u.id
+		WHERE 
+			f.id=? 
+		LIMIT 1
+	`, id)
 	if err != nil {
 		log.Println(err)
 		return nil, fmt.Errorf(SQL_STR)
@@ -135,7 +164,7 @@ func FileInfo(id string) (map[string]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(records) != 0 {
+	if len(records) != 1 {
 		return nil, nil
 	}
 	return records[0], nil

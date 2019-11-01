@@ -73,6 +73,8 @@ func FileAddFile(p *file.AddFile, user string) (string, error) {
 		typee = "pkg"
 	case ext == ".apk":
 		typee = "apk"
+	case ext == ".jar":
+		typee = "jar"
 	default:
 		typee = "file"
 	}

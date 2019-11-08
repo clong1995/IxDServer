@@ -7,11 +7,11 @@ import (
 )
 
 //注册参数
-type List struct {
+type ListByPid struct {
 	Pid string `json:"pid" required:"true"`
 }
 
-func (c *List) Format(w http.ResponseWriter, r *http.Request) error {
+func (c *ListByPid) Format(w http.ResponseWriter, r *http.Request) error {
 	//json转结构体
 	err := network.GetReqJson(r, c)
 	if err != nil {

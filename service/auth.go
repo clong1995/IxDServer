@@ -93,7 +93,7 @@ func AuthSignin(p *auth.Signin) (string, error) {
 
 //解密token
 func AuthUnToken(token string) (string, error) {
-	if token == "" || len(token) < 100 {
+	if token == "" || len(token) < 50 {
 		return "", fmt.Errorf(AUTH_STR)
 	}
 	id, err := util.UnMarshalToken(token)
@@ -133,4 +133,38 @@ func AuthProlongToken(token string) (map[string]interface{}, error) {
 		"token":    newToken,
 		"datetime": time.Now().String(),
 	}, nil
+}
+
+//重置密码
+func AuthResetPassword(p *auth.ResetPassword, user string) error {
+	//查询用户id
+	userInfo, err := db.SelectUserById(user)
+	if err != nil {
+		return err
+	}
+	userId := userInfo["id"].(string)
+
+	//检验旧密码
+	userData, err := db.SelectUserByEmail(userInfo["email"].(string))
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(userData["password"].(string)), []byte(p.OldPassword+userId))
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(PASSWORD_STR)
+	}
+
+	//从新构造密码
+	hash, err := bcrypt.GenerateFromPassword([]byte(p.NewPassword+userId), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(EMPTY_STR)
+	}
+	password := string(hash)
+	err = db.UpdateUserPassword(userId, password)
+	if err != nil {
+		return err
+	}
+	return nil
 }

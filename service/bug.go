@@ -16,7 +16,7 @@ func BugList(uid string) (interface{}, error) {
 	//公司
 	company := info["company"].(string)
 	//等级
-	rank := int(info["rank"].(uint32))
+	rank := int(info["rank"].(uint8))
 	rank += 1
 
 	rows, err := db.SelectBugList(company, rank)

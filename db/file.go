@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-func InsertFileFolder(id, name, pid, user string) error {
-	_, err := Db.Exec("INSERT INTO file (id, name,type, pid, user) values (?,?,?,?,?)", id, name, "folder", pid, user)
+func InsertFileFolder(id, name, pid, user, folderType string) error {
+	_, err := Db.Exec("INSERT INTO file (id, name,type, pid, user) values (?,?,?,?,?)", id, name, folderType, pid, user)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf(SQL_STR)
@@ -93,7 +93,7 @@ func SelectFileTopFolderList() ([]map[string]interface{}, error) {
 	return records, nil
 }
 
-func SelectFileList(pid, user string) ([]map[string]interface{}, error) {
+func SelectFileList(pid string) ([]map[string]interface{}, error) {
 	rows, err := Db.Query(`
 		SELECT 
 			id, etag, name, mime, type, state, user, update_time 
@@ -102,13 +102,162 @@ func SelectFileList(pid, user string) ([]map[string]interface{}, error) {
 		WHERE 
 			pid=? 
 		AND 
-			user=? 
+			state!=1 
+		ORDER BY 
+			update_time 
+		DESC
+		`, pid)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileOwn(id string) (bool, error) {
+	rows, err := Db.Query(`
+		SELECT 
+			id
+		FROM 
+			file 
+		WHERE 
+			id=? 
+		`, id)
+	if err != nil {
+		log.Println(err)
+		return false, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return false, err
+	}
+	if len(records) > 0 {
+		return true, nil
+	}
+	return false, nil
+}
+
+func SelectFileMyList(pid, user string) ([]map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT 
+			id, etag, name, mime, type, state, user, update_time 
+		FROM 
+			file 
+		WHERE 
+			pid=? 
+		AND 
+			user=?
 		AND 
 			state!=1 
 		ORDER BY 
 			update_time 
 		DESC
 		`, pid, user)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileDepartmentBucket(department string) ([]map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT f.id, f.etag, f.name, f.mime, f.type, f.state, f.user, f.update_time 
+		FROM file f
+		left join user u on u.id = f.user
+		left join department d on d.id = u.department
+		WHERE f.pid= 'departmentBucket'  
+		AND f.state!=1 
+		AND d.id=?
+		ORDER BY 
+			f.update_time 
+		DESC
+		`, department)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileFolderCompany() ([]map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT 
+			id, etag, name, mime, type, state, user, update_time 
+		FROM 
+			file 
+		WHERE 
+			pid= "departmentBucket" 
+		AND 
+			type= "folder-company"
+		AND 
+			state!=1 
+		ORDER BY 
+			update_time 
+		DESC
+		`)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileByPidList(pid string) ([]map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT id, etag, name, mime, type, state, user, update_time 
+		FROM file 
+		WHERE pid=? 
+		AND state!=1 
+		ORDER BY update_time DESC
+		`, pid)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileByUserList(user string) ([]map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT id, etag, name, mime, type, state, user, update_time 
+		FROM file 
+		WHERE id=? 
+		AND state!=1 
+		ORDER BY update_time DESC
+		`, user)
 	if err != nil {
 		log.Println(err)
 		return nil, fmt.Errorf(SQL_STR)
@@ -228,6 +377,34 @@ func SelectFileUploading(etags []string, user string) ([]map[string]interface{},
 			user=? 
 		AND state=2 
 		AND local!='' 
+		AND etag IN ('%s') 
+		ORDER BY 
+			update_time 
+		DESC
+	`, idStr)
+	rows, err := Db.Query(sqlRaw, user)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+func SelectFileByEtags(etags []string, user string) ([]map[string]interface{}, error) {
+	idStr := strings.Join(etags, "','")
+	sqlRaw := fmt.Sprintf(`
+		SELECT 
+			id, etag, name, mime, type, user, update_time, local 
+		FROM 
+			file 
+		WHERE 
+			user=? 
 		AND etag IN ('%s') 
 		ORDER BY 
 			update_time 

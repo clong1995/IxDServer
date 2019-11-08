@@ -82,7 +82,7 @@ func FileDelete(w http.ResponseWriter, r *http.Request) {
 	} else if r.Method == http.MethodPost {
 		//认证
 		token := r.Header.Get("Authorization")
-		_, err := service.AuthUnToken(token)
+		uid, err := service.AuthUnToken(token)
 		if err != nil {
 			network.ErrStrCode(w, err.Error(), AUTH)
 			return
@@ -96,7 +96,7 @@ func FileDelete(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//业务
-		err = service.FileDelete(p)
+		err = service.FileDelete(p, uid)
 		if err != nil {
 			network.ErrStr(w, err.Error())
 			return
@@ -226,6 +226,37 @@ func FileList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func FileMyList(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//读取head
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		p := new(file.List)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		rows, err := service.FileMyList(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+		network.Succ(w, rows)
+	}
+}
+
 func FileDeleteList(w http.ResponseWriter, r *http.Request) {
 	//跨域
 	network.Origin(w)
@@ -243,6 +274,57 @@ func FileDeleteList(w http.ResponseWriter, r *http.Request) {
 		//参数
 		//业务
 		rows, err := service.FileDeleteList(uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+		network.Succ(w, rows)
+	}
+}
+
+func FileDepartmentList(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//读取head
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		//业务
+		rows, err := service.FileDepartmentList(uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+		network.Succ(w, rows)
+	}
+}
+
+func FileDepartmentPublic(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//读取head
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+
+		//业务
+		rows, err := service.FileDepartmentPublic(uid)
 		if err != nil {
 			network.ErrStr(w, err.Error())
 			return
@@ -357,6 +439,36 @@ func FileUploading(w http.ResponseWriter, r *http.Request) {
 
 		//业务
 		rows, err := service.FileUploading(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+		network.Succ(w, rows)
+	}
+}
+
+func FileListByEtags(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//读取head
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+		//参数
+		p := new(file.ListByEtags)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		rows, err := service.FileListByEtags(p, uid)
 		if err != nil {
 			network.ErrStr(w, err.Error())
 			return

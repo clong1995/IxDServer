@@ -17,4 +17,6 @@ func init() {
 	http.HandleFunc("/auth/getUid", handler.AuthGetUid)
 	//续期
 	http.HandleFunc("/auth/prolong", handler.AuthProlongToken)
+	//重置密码
+	http.HandleFunc("/auth/resetPassword", handler.AuthResetPassword)
 }

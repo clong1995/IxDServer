@@ -10,6 +10,7 @@ import (
 )
 
 func FileAddFolder(p *file.AddFolder, user string) error {
+	folderType := "folder"
 	//检查是否重名
 	b, err := db.HasFileFolderName(p.Name, p.Pid, user)
 	if err != nil {
@@ -20,7 +21,7 @@ func FileAddFolder(p *file.AddFolder, user string) error {
 	}
 	//建立新的文件夹
 	id := uuid.NewV4().String()
-	err = db.InsertFileFolder(id, p.Name, p.Pid, user)
+	err = db.InsertFileFolder(id, p.Name, p.Pid, user, folderType)
 	if err != nil {
 		return err
 	}
@@ -86,9 +87,19 @@ func FileAddFile(p *file.AddFile, user string) (string, error) {
 	return id, nil
 }
 
-func FileDelete(p *file.Delete) error {
-	//建立新的文件夹
-	err := db.UpdateFileState(p.Id, 1)
+func FileDelete(p *file.Delete, user string) error {
+	//检查是否属于自己
+	flag, err := db.SelectFileOwn(p.Id)
+	if err != nil {
+		return err
+	}
+	if !flag {
+		return fmt.Errorf("无权删除别人的文件")
+	}
+
+	//TODO 等级是部门管理员，则可删除成员的
+
+	err = db.UpdateFileState(p.Id, 1)
 	if err != nil {
 		return err
 	}
@@ -122,7 +133,22 @@ func FileListTopFolder() (interface{}, error) {
 }
 
 func FileList(p *file.List, user string) (interface{}, error) {
-	rows, err := db.SelectFileList(p.Pid, user)
+	rows, err := db.SelectFileList(p.Pid)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range rows {
+		if v["user"] == user {
+			v["user"] = "own"
+		} else {
+			v["user"] = ""
+		}
+	}
+	return rows, err
+}
+
+func FileMyList(p *file.List, user string) (interface{}, error) {
+	rows, err := db.SelectFileMyList(p.Pid, user)
 	if err != nil {
 		return nil, err
 	}
@@ -187,4 +213,75 @@ func FileUploading(p *file.Uploading, user string) (interface{}, error) {
 		return rows, nil
 	}
 	return nil, nil
+}
+
+func FileListByEtags(p *file.ListByEtags, user string) (interface{}, error) {
+	if len(p.Etags) > 0 {
+		rows, err := db.SelectFileByEtags(p.Etags, user)
+		if err != nil {
+			return nil, err
+		}
+		return rows, nil
+	}
+	return [0]int{}, nil
+}
+
+func FileDepartmentList(user string) (interface{}, error) {
+	//查询当前用户的等级
+	userInfo, err := db.SelectUserById(user)
+	if err != nil {
+		return nil, err
+	}
+	rank := userInfo["rank"].(uint8)
+	department := userInfo["department"].(string)
+	company := userInfo["company"].(string)
+
+	var rows []map[string]interface{}
+	switch rank {
+	case 0: //如果是Super Admin，能看到全部公司
+		rows, err = db.SelectFileFolderCompany()
+		break
+	case 1: //如果是公司管理员 xxx Admin，看到本公司下所有的部门文件
+		rows, err = db.SelectFileByPidList(company)
+		break
+	case 2: //如果是部门用户，看到自己部门下的员工的文件
+		rows, err = db.SelectFileByPidList(department)
+		break
+	case 3: //看到自己
+		rows, err = db.SelectFileByUserList(user)
+		break
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range rows {
+		if v["user"] == user {
+			v["user"] = "own"
+		} else {
+			delete(v, "user")
+		}
+	}
+	return rows, nil
+}
+
+func FileDepartmentPublic(user string) (interface{}, error) {
+	userInfo, err := db.SelectUserById(user)
+	if err != nil {
+		return nil, err
+	}
+	department := userInfo["department"].(string)
+	//查询这个部门下所有的顶级部门文件
+	rows, err := db.SelectFileDepartmentBucket(department)
+	if err != nil {
+		return nil, err
+	}
+	for _, v := range rows {
+		if v["user"] == user {
+			v["user"] = "own"
+		} else {
+			delete(v, "user")
+		}
+	}
+	return rows, nil
 }

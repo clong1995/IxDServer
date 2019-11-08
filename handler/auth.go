@@ -148,3 +148,34 @@ func AuthProlongToken(w http.ResponseWriter, r *http.Request) {
 		network.Succ(w, str)
 	}
 }
+
+//重置密码
+func AuthResetPassword(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//认证
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+		//参数
+		p := new(auth.ResetPassword)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+		//业务
+		err = service.AuthResetPassword(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+
+		network.Succ(w, "")
+	}
+}

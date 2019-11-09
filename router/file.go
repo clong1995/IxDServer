@@ -15,6 +15,12 @@ func init() {
 	//文件列表
 	http.HandleFunc("/file/list", handler.FileList)
 	//文件列表
+	http.HandleFunc("/file/rename", handler.FileRename)
+	//复制
+	http.HandleFunc("/file/copy", handler.FileCopy)
+	//剪切
+	http.HandleFunc("/file/cut", handler.FileCut)
+	//文件列表
 	http.HandleFunc("/file/myList", handler.FileMyList)
 	//删除的文件列表
 	http.HandleFunc("/file/deleteList", handler.FileDeleteList)

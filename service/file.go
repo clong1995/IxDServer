@@ -89,7 +89,7 @@ func FileAddFile(p *file.AddFile, user string) (string, error) {
 
 func FileDelete(p *file.Delete, user string) error {
 	//检查是否属于自己
-	flag, err := db.SelectFileOwn(p.Id)
+	flag, err := db.SelectFileOwn(p.Id, user)
 	if err != nil {
 		return err
 	}
@@ -105,10 +105,56 @@ func FileDelete(p *file.Delete, user string) error {
 	}
 	return nil
 }
+func FileRename(p *file.Rename, user string) error {
+	//检查是否属于自己
+	flag, err := db.SelectFileOwn(p.Id, user)
+	if err != nil {
+		return err
+	}
+	if !flag {
+		return fmt.Errorf("无权修改别人的文件")
+	}
+	err = db.UpdateFileName(p.Id, p.Name)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FileCut(p *file.Cut, user string) error {
+	//检查是否属于自己
+	flag, err := db.SelectFileOwn(p.File, user)
+	if err != nil {
+		return err
+	}
+	if !flag {
+		return fmt.Errorf("无权剪切别人的文件")
+	}
+	err = db.UpdateFilePid(p.File, p.Dist)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FileCopy(p *file.Copy, user string) error {
+	//复制
+	err := copyFile(p.File, p.Dist, user)
+	if err != nil {
+		return err
+	}
+	//自动重命名
+	return nil
+}
 
 func FileRemove(p *file.Remove) error {
-	//建立新的文件夹
+	/*//删除数据
 	err := db.DeleteFile(p.Id)
+	if err != nil {
+		return err
+	}
+	return nil*/
+	err := db.UpdateFileState(p.Id, 3)
 	if err != nil {
 		return err
 	}
@@ -179,7 +225,7 @@ func FileTaskList(user string) (interface{}, error) {
 }
 
 func FileInfo(p *file.Info) (interface{}, error) {
-	row, err := db.SelectFileById(p.Id)
+	row, err := db.SelectFileInfoById(p.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -284,4 +330,34 @@ func FileDepartmentPublic(user string) (interface{}, error) {
 		}
 	}
 	return rows, nil
+}
+
+//TODO 这里高并发，阻塞，单线程。需要优化
+func copyFile(fId, pid, user string) error {
+	//首先复制自己
+	row, err := db.SelectFileById(fId)
+	id := uuid.NewV4().String()
+	err = db.InsertFile(id, row["etag"].(string), row["name"].(string), pid, row["type"].(string), user, row["mime"].(string), "", row["size"], 0)
+	if err != nil {
+		return err
+	}
+
+	//向前移动
+	pid = id
+
+	//查询子目录文件
+	rows, err := db.SelectFileList(fId)
+	if err != nil {
+		return err
+	}
+	//复制子目录
+	if len(rows) > 0 {
+		for _, v := range rows {
+			err := copyFile(v["id"].(string), pid, user)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

@@ -170,6 +170,102 @@ func FileUploadFinish(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func FileRename(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//认证
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		p := new(file.Rename)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		err = service.FileRename(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+
+		network.Succ(w, "")
+	}
+}
+
+func FileCut(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//认证
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		p := new(file.Cut)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		err = service.FileCut(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+
+		network.Succ(w, "")
+	}
+}
+
+func FileCopy(w http.ResponseWriter, r *http.Request) {
+	//跨域
+	network.Origin(w)
+	if r.Method == http.MethodGet {
+		network.FbdReq(w)
+	} else if r.Method == http.MethodPost {
+		//认证
+		token := r.Header.Get("Authorization")
+		uid, err := service.AuthUnToken(token)
+		if err != nil {
+			network.ErrStrCode(w, err.Error(), AUTH)
+			return
+		}
+
+		//参数
+		p := new(file.Copy)
+		err = p.Format(w, r)
+		if err != nil {
+			return
+		}
+
+		//业务
+		err = service.FileCopy(p, uid)
+		if err != nil {
+			network.ErrStr(w, err.Error())
+			return
+		}
+
+		network.Succ(w, "")
+	}
+}
+
 func FileListTopFolder(w http.ResponseWriter, r *http.Request) {
 	//跨域
 	network.Origin(w)

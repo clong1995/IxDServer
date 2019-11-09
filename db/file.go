@@ -16,7 +16,7 @@ func InsertFileFolder(id, name, pid, user, folderType string) error {
 	return nil
 }
 
-func InsertFile(id, etag, name, pid, typee, user, mime, local string, size float64, state int) error {
+func InsertFile(id, etag, name, pid, typee, user, mime, local string, size interface{}, state int) error {
 	_, err := Db.Exec("INSERT INTO file (id,etag,name,pid,type,user,mime,local,size,state) values (?,?,?,?,?,?,?,?,?,?)",
 		id, etag, name, pid, typee, user, mime, local, size, state)
 	if err != nil {
@@ -28,6 +28,23 @@ func InsertFile(id, etag, name, pid, typee, user, mime, local string, size float
 
 func UpdateFileState(id string, state int) error {
 	result, err := Db.Exec("UPDATE file SET state = ? WHERE id = ?", state, id)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	i, err := result.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	if i < 0 {
+		return fmt.Errorf(EMPTY_STR)
+	}
+	return nil
+}
+
+func UpdateFileName(id, name string) error {
+	result, err := Db.Exec("UPDATE file SET name = ? WHERE id = ?", name, id)
 	if err != nil {
 		log.Println(err)
 		return fmt.Errorf(SQL_STR)
@@ -77,6 +94,23 @@ func UpdateFileFinish(id string) error {
 	return nil
 }
 
+func UpdateFilePid(file, pid string) error {
+	result, err := Db.Exec("UPDATE file SET pid = ? WHERE id = ?", pid, file)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	i, err := result.RowsAffected()
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf(SQL_STR)
+	}
+	if i < 0 {
+		return fmt.Errorf(EMPTY_STR)
+	}
+	return nil
+}
+
 func SelectFileTopFolderList() ([]map[string]interface{}, error) {
 	rows, err := Db.Query(`SELECT id,name,type FROM file WHERE pid IS NULL AND state=0 ORDER BY sort ASC`)
 
@@ -96,7 +130,7 @@ func SelectFileTopFolderList() ([]map[string]interface{}, error) {
 func SelectFileList(pid string) ([]map[string]interface{}, error) {
 	rows, err := Db.Query(`
 		SELECT 
-			id, etag, name, mime, type, state, user, update_time 
+			id, etag, name, mime, type, state, user,size, update_time 
 		FROM 
 			file 
 		WHERE 
@@ -120,7 +154,7 @@ func SelectFileList(pid string) ([]map[string]interface{}, error) {
 	return records, nil
 }
 
-func SelectFileOwn(id string) (bool, error) {
+func SelectFileOwn(fId, uId string) (bool, error) {
 	rows, err := Db.Query(`
 		SELECT 
 			id
@@ -128,7 +162,8 @@ func SelectFileOwn(id string) (bool, error) {
 			file 
 		WHERE 
 			id=? 
-		`, id)
+		AND user = ?
+		`, fId, uId)
 	if err != nil {
 		log.Println(err)
 		return false, fmt.Errorf(SQL_STR)
@@ -292,6 +327,34 @@ func HasFileFolderName(name, pid, user string) (bool, error) {
 func SelectFileById(id string) (map[string]interface{}, error) {
 	rows, err := Db.Query(`
 		SELECT 
+			id,etag,name,type,size,pid,state,mime,user
+		FROM 
+			file
+		WHERE 
+			id=? 
+		AND 
+			state = 0
+		LIMIT 1
+	`, id)
+	if err != nil {
+		log.Println(err)
+		return nil, fmt.Errorf(SQL_STR)
+	}
+	defer rows.Close()
+
+	records, err := ParseRows(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(records) != 1 {
+		return nil, nil
+	}
+	return records[0], nil
+}
+
+func SelectFileInfoById(id string) (map[string]interface{}, error) {
+	rows, err := Db.Query(`
+		SELECT 
 			f.id,f.etag,f.name,f.type,f.size,f.pid,f.state,u.email 
 		FROM 
 			file f 
@@ -301,6 +364,8 @@ func SelectFileById(id string) (map[string]interface{}, error) {
 			f.user = u.id
 		WHERE 
 			f.id=? 
+		AND 
+			f.state = 0
 		LIMIT 1
 	`, id)
 	if err != nil {

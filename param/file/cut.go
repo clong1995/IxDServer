@@ -8,8 +8,8 @@ import (
 
 //注册参数
 type Cut struct {
-	Dist string `json:"dist" required:"true"`
-	File string `json:"file" required:"true"`
+	Dist string   `json:"dist" required:"true"`
+	File []string `json:"file" required:"true"`
 }
 
 func (c *Cut) Format(w http.ResponseWriter, r *http.Request) error {

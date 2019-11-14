@@ -94,7 +94,7 @@ func UpdateFileFinish(id string) error {
 	return nil
 }
 
-func UpdateFilePid(file, pid string) error {
+func UpdateFilePid(file string, pid string) error {
 	result, err := Db.Exec("UPDATE file SET pid = ? WHERE id = ?", pid, file)
 	if err != nil {
 		log.Println(err)
@@ -154,7 +154,7 @@ func SelectFileList(pid string) ([]map[string]interface{}, error) {
 	return records, nil
 }
 
-func SelectFileOwn(fId, uId string) (bool, error) {
+func SelectFileOwn(fId string, uId string) (bool, error) {
 	rows, err := Db.Query(`
 		SELECT 
 			id

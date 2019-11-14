@@ -105,6 +105,7 @@ func FileDelete(p *file.Delete, user string) error {
 	}
 	return nil
 }
+
 func FileRename(p *file.Rename, user string) error {
 	//检查是否属于自己
 	flag, err := db.SelectFileOwn(p.Id, user)
@@ -122,17 +123,19 @@ func FileRename(p *file.Rename, user string) error {
 }
 
 func FileCut(p *file.Cut, user string) error {
-	//检查是否属于自己
-	flag, err := db.SelectFileOwn(p.File, user)
-	if err != nil {
-		return err
-	}
-	if !flag {
-		return fmt.Errorf("无权剪切别人的文件")
-	}
-	err = db.UpdateFilePid(p.File, p.Dist)
-	if err != nil {
-		return err
+	for _, fId := range p.File {
+		//检查是否属于自己
+		flag, err := db.SelectFileOwn(fId, user)
+		if err != nil {
+			return err
+		}
+		if !flag {
+			return fmt.Errorf("无权剪切别人的文件")
+		}
+		err = db.UpdateFilePid(fId, p.Dist)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -333,29 +336,34 @@ func FileDepartmentPublic(user string) (interface{}, error) {
 }
 
 //TODO 这里高并发，阻塞，单线程。需要优化
-func copyFile(fId, pid, user string) error {
-	//首先复制自己
-	row, err := db.SelectFileById(fId)
-	id := uuid.NewV4().String()
-	err = db.InsertFile(id, row["etag"].(string), row["name"].(string), pid, row["type"].(string), user, row["mime"].(string), "", row["size"], 0)
-	if err != nil {
-		return err
-	}
+func copyFile(fIds []string, pid, user string) error {
+	for _, fId := range fIds {
+		//首先复制自己
+		row, err := db.SelectFileById(fId)
+		if err != nil {
+			return err
+		}
+		id := uuid.NewV4().String()
+		err = db.InsertFile(id, row["etag"].(string), row["name"].(string), pid, row["type"].(string), user, row["mime"].(string), "", row["size"], 0)
+		if err != nil {
+			return err
+		}
 
-	//向前移动
-	pid = id
+		//向前移动
+		pid = id
 
-	//查询子目录文件
-	rows, err := db.SelectFileList(fId)
-	if err != nil {
-		return err
-	}
-	//复制子目录
-	if len(rows) > 0 {
-		for _, v := range rows {
-			err := copyFile(v["id"].(string), pid, user)
-			if err != nil {
-				return err
+		//查询子目录文件
+		rows, err := db.SelectFileList(fId)
+		if err != nil {
+			return err
+		}
+		//复制子目录
+		if len(rows) > 0 {
+			for _, v := range rows {
+				err := copyFile([]string{v["id"].(string)}, pid, user)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

@@ -19,7 +19,7 @@ var CONF *config
 func init() {
 	httpAddr := flag.String("httpAddr", ":50001", "服务端口")
 	encryptedKey := flag.String("encryptedKey", "key:zoolon872112", "加解密token的私钥")
-	dataSourceName := flag.String("dataSourceName", "root:123.com@tcp(quickex.com.cn:3306)/ixd?charset=utf8", "mysql数据源")
+	dataSourceName := flag.String("dataSourceName", "root:xxx@tcp(xxx.com.cn:3306)/ixd?charset=utf8", "mysql数据源")
 	authTokenStart := flag.String("authTokenStart", "Bearer ", "token类型")
 	authTokenDeadline := flag.Int64("authTokenDeadline", 604800, "token有效期")
 	qiniuAccessKey := flag.String("qiniuAccessKey", "zobcXoKuteQUmUFgRk6FR85kgRRslmqx4BZeEdrc", "七牛 accessKey")
